@@ -187,6 +187,7 @@ def test_optimize(optimize):
     Args:
         optimize (function): function for adding a+b
     '''
+    result = []
 
     for test in [Simple1, Simple2, Simple3]:
 
@@ -229,6 +230,9 @@ def test_optimize(optimize):
         else:
             print('Fail: optimize does better than random search on %s %.3f pct of the time.' % (p.prob,frac*100))
 
+        result.append((p.prob,frac*100))
+
+    print(result)
     return
     
 

@@ -1,5 +1,4 @@
 import numpy as np
-from project1_py.LineSearch import approx_line_search
 
 class DescentMethod:
 	def __init__(self, f, g):
@@ -81,7 +80,7 @@ class Adam(DescentMethod):
 		v : 1st moment estimate
 		s : 2nd moment estimate
 	"""
-	def __init__(self, f, g, alpha=0.001, gamma1=0.9, gamma2=0.999, eps=1e-8):
+	def __init__(self, f, g,  alpha=0.3, gamma1=0.2, gamma2=0.9, eps=1e-8):
 		DescentMethod.__init__(self,f,g)
 		self.alpha = alpha
 		self.gamma1 = gamma1
@@ -131,7 +130,7 @@ class bfgs(DescentMethod):
 		self.Q -= np.dot(y, y_t) * np.dot(self.Q, self.Q) / yQy + delta_term 
 		self.x = x_prime 
 
-	def backtracking_line_search(self, d, alpha=1.5, p=0.5, beta=1e-4):
+	def backtracking_line_search(self, d, alpha=1, p=0.75, beta=1e-4):
 		"""
 		Approximate line search to find a suitable step size with a
 		small number of evaluations. The condition for sufficient decrease is

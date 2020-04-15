@@ -30,6 +30,11 @@ def optimize(f, g, x0, n, count, prob):
     Returns:
         x_best (np.array): best selection of variables found
     """
-    minimizer = bfgs(f=f, g=g)
+    minimizer = None
+    # if prob == 'simple1':
+    minimizer = Adam(f=f, g=g, alpha=0.3, gamma1=0.2, gamma2=0.9)
+    # else:
+        # minimizer = Adam(f=f, g=g)
+    # minimizer = bfgs(f=f, g=g)
     x, _, _, _ = minimizer.minimize(x0, n)
     return x
