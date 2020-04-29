@@ -10,14 +10,12 @@ class DescentMethod:
 	def f(self, x):
 		self.count += 1
 		if self.count <= self.maxIter:
-			# print("mycounter:",self.count)
 			return self.f_fun(x)
 		return StopIteration
 
 	def g(self, x):
 		self.count += 2
 		if self.count <= self.maxIter:
-			# print("mycounter:",self.count)
 			return self.g_fun(x)
 		return StopIteration
 
@@ -30,7 +28,7 @@ class DescentMethod:
 	 	"""
 		raise NotImplementedError
 
-	def minimize(self, x=0, maxIter=10, reltol_threshold=1e-5):
+	def minimize(self, x=0, maxIter=10, reltol_threshold=1e-3):
 		"""
 		wrapper to call _step
 		minimizes f till reltol < threshold
@@ -43,20 +41,23 @@ class DescentMethod:
 		if maxIter < 1:
 			return self.x, x_history, self.count, reltol
 		f_x = self.f(self.x)
+		eps = 1e-8
 
-		x_history = [x]
+		x_history = [np.array(self.x)]
 		reltol = np.inf
 		reltol_threshold = abs(reltol_threshold)
+		
 		while abs(reltol) > reltol_threshold:
 			# print("count:",self.count)
 			f_prev = f_x
 			try:
 				self._step()
 				f_x = self.f(self.x)
-				reltol = (f_prev - f_x)/f_prev
+				reltol = (f_prev - f_x)/(f_prev + eps)
 			except :
 				break
-			x_history.append(self.x)
+			x_history.append(np.array(self.x))
+
 		return self.x, x_history, self.count, reltol
 
 class GradientDescent (DescentMethod):
