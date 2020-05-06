@@ -23,7 +23,7 @@ def optimize(f, g, c, x0, n, count, prob):
         c (function): Function evaluating constraints
         x0 (np.array): Initial position to start from
         n (int): Number of evaluations allowed. Remember `f` and `c` cost 1 and `g` costs 2
-        count (function): takes no arguments are reutrns current count
+        count (function): takes no arguments are returns current count
         prob (str): Name of the problem. So you can use a different strategy 
                  for each problem. `prob` can be `simple1`,`simple2`,`simple3`,
                  `secret1` or `secret2`
