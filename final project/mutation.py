@@ -9,9 +9,15 @@ class MutationMethod:
 	def BitwiseMutation(self, a):
 		# for binary genes
 		prob  = np.random.normal(0.5, 1, self.gene_length)
-		return [g if prob>self.lam else not g for g in a]
+		return [a[i] if prob[i]>self.lam else not a[i] for i in range(self.gene_length)]
 
 	def GaussianMutation (self, a):
 		# for real valued genes
 		noise  = np.random.normal(self.mu, self.sigma, self.gene_length)
 		return [a[i] + noise[i] for i in range(self.gene_length)]
+
+	def BitwiseGaussian(self,a):
+		# import pdb;pdb.set_trace()
+		prob  = np.random.normal(0.5, 1, self.gene_length)
+		noise  = np.random.normal(self.mu, self.sigma, self.gene_length)
+		return [a[i] if prob[i]>self.lam else a[i]+noise[i] for i in range(self.gene_length)]

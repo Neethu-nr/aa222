@@ -38,17 +38,11 @@ class ContactDetector(contactListener):
         contactListener.__init__(self)
         self.env = env
     def BeginContact(self, contact):
-        # if self.env.hull.linearVelocity[0] ==0:
-        #     self.env.done = True            
         for w in self.env.active_walkers:
             if w.face in [contact.fixtureA.body, contact.fixtureB.body]:
-                # import pdb;pdb.set_trace()
-                # print("face touch")
                 self.env.active_walkers.remove(w)
                 w.done = True
             if w.hull in [contact.fixtureA.body, contact.fixtureB.body]:
-                # import pdb;pdb.set_trace()
-                # print("hull touch")
                 self.env.active_walkers.remove(w)
                 w.done = True
 
@@ -59,14 +53,13 @@ class ContactDetector(contactListener):
                 if hand in [contact.fixtureA.body, contact.fixtureB.body]:
                     hand.ground_contact = True
 
-            # if w.steps%50 ==0 and w.steps>0:
-            #     if w.hull.position[0] <= w.prev_loc:
-            #         # import pdb;pdb.set_trace()
-            #         print("no movement")
-            #         self.env.active_walkers.remove(w)
-            #         w.done = True
-            #     else:
-            #         w.prev_loc = w.hull.position[0]
+            if w.steps%250 ==0 and w.steps>0:
+                if w.hull.position[0] <= w.prev_loc:
+                    print("no move")
+                    self.env.active_walkers.remove(w)
+                    w.done = True
+                else:
+                    w.prev_loc = w.hull.position[0]
 
     def EndContact(self, contact):
         for w in self.env.active_walkers:
@@ -102,8 +95,6 @@ class World(gym.Env, EzPickle):
         self.generate_terrain(hardcore)
 
     def reset_world(self):
-        # import pdb;pdb.set_trace()
-
         self.drawlist = self.terrain
         self.steps = 0
         self.scroll = max(self.pos)- VIEWPORT_W/SCALE/5
@@ -125,6 +116,7 @@ class World(gym.Env, EzPickle):
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
+
     def generate_terrain(self, hardcore):
         GRASS, STUMP, STAIRS, PIT, _STATES_ = range(5)
         state    = GRASS
@@ -301,6 +293,7 @@ class World(gym.Env, EzPickle):
             self.pos.append(walker.hull.position.x)
             self.velocity.append(walker.hull.linearVelocity[0])
             done.append(walker.done)
+
         if display:
             self.render()
 
@@ -694,34 +687,37 @@ class BipedalWalker(gym.Env, EzPickle):
         self.a[7] = knee_todo[1]
         self.a = np.clip(0.5*self.a, -1.0, 1.0)
 
-def test_walkers(genes):
-    print(genes)
-    # genes = [[84, 2, 2, 42, 31], [55, 6, 5, 44, 37], [33, 6, 5, 6, 33], [35, 3, 3, 43, 43], 
-    # [13, 1, 1, 40, 5], [27, 4, 6, 31, 41], [54, 9, 9, 23, 35], [47, 7, 3, 2, 29], [69, 5, 2, 41, 12], [34, 2, 5, 22, 32]]
-    # genes = [[80,4,6,30,28], [80,4,6,30,48],[80,4,6,50,28]] 
-    # Heurisic: suboptimal, have no notion of balance.
-    # import pdb;pdb.set_trace()
-    world = World(genes)
-    while not world.done:         
-        # import pdb;pdb.set_trace()
-        world.step()
-    print("all walkers have stopped, final rewards:", world.reward)
-    return world.reward
+# def test_walkers(genes):
+#     print(genes)
+#     # genes = [[84, 2, 2, 42, 31], [55, 6, 5, 44, 37], [33, 6, 5, 6, 33], [35, 3, 3, 43, 43], 
+#     # [13, 1, 1, 40, 5], [27, 4, 6, 31, 41], [54, 9, 9, 23, 35], [47, 7, 3, 2, 29], [69, 5, 2, 41, 12], [34, 2, 5, 22, 32]]
+#     # genes = [[80,4,6,30,28], [80,4,6,30,48],[80,4,6,50,28]] 
+#     # Heurisic: suboptimal, have no notion of balance.
+#     # import pdb;pdb.set_trace()
+#     world = World(genes)
+#     while not world.done:         
+#         # import pdb;pdb.set_trace()
+#         world.step()
+#     print("all walkers have stopped, final rewards:", world.reward)
+#     return world.reward
+
 class Fitness:
     def __init__(self):
         self.world = World()
+        # import pdb; pdb.set_trace()
 
     def fitness(self, genes, display=False):
-        self.steps = 0
+        # self.steps = 0
         self.world.start_population(genes)
-        while not self.world.done and self.steps<500:          
-            self.steps += 1
+        while not self.world.done:   
+            # import pdb;pdb.set_trace()       
+            # self.steps += 1
             self.world.step(display)
         # print("all walkers have stopped, final rewards:", self.world.reward)
         return self.world.reward
     
-class BipedalWalkerHardcore(BipedalWalker):
-    hardcore = True
-if __name__=="__main__":
-    genes = [[84,4,6,30,26.5]]
-    test_walkers(genes)
+# class BipedalWalkerHardcore(BipedalWalker):
+#     hardcore = True
+# if __name__=="__main__":
+#     genes = [[84,4,6,30,26.5]]
+#     test_walkers(genes)

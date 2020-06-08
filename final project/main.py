@@ -3,7 +3,7 @@
 
 import random
 import numpy as np
-from biped_walker_modified import Fitness
+from biped_walker import Fitness
 from crossover import CrossoverMethod
 from mutation import MutationMethod
 from selection import SelectionMethod
@@ -33,7 +33,7 @@ def starting_population(population_size, get_fitness, gene_range, gene_length):
 
     genes = list(map(list, zip(*genes)))
 
-    fitness_vals = get_fitness(genes)
+    fitness_vals = get_fitness(genes, display=True)
     population = [Chromosome(genes[i], fitness_vals[i]) for i in range(population_size)]
     return population, fitness_vals
 
@@ -46,7 +46,7 @@ def get_best(population):
 
 
 
-def genetic_algorithm(population, functions, constants):
+def genetic_algorithm(population, functions, constants, heading, name):
     population,fitness_vals = population 
     fitness, select, crossover, mutate = functions
     MAX_ITER, POPULATION_SIZE, SAMPLE_SIZE = constants
@@ -56,14 +56,16 @@ def genetic_algorithm(population, functions, constants):
         # returns True if improvement in this iteration
         return_val = False
         if plot:
-            # import pdb;pdb.set_trace()
             import matplotlib.pyplot as plt
             plt.plot(stats.best_current_hist,label='best per population')
             plt.plot(stats.best_global_hist,label='best so far')
             plt.plot(stats.avg,label='avg')
             plt.plot(stats.worst,label='min')
-            plt.legend()
-            plt.show()
+            # plt.legend()
+            plt.title(heading)
+            # import pdb;pdb.set_trace()
+            # plt.show()
+            plt.savefig(name)
             return return_val
 
         max_fitness = max(fitness_vals)
@@ -107,9 +109,10 @@ def genetic_algorithm(population, functions, constants):
 
         # sample parents according to probability proportional to fitness
         # import pdb;pdb.set_trace()
-        min_val =min(fitness_vals)
-        prob = [parents[i].Fitness - min_val for i in range(SAMPLE_SIZE) ]
-        # prob = np.clip(prob,0,None)
+        # min_val =min(fitness_vals)
+        # prob = [parents[i].Fitness - min_val for i in range(SAMPLE_SIZE) ]
+        prob = [parents[i].Fitness for i in range(SAMPLE_SIZE) ]
+        prob = np.clip(prob,0,None)
         prob /= sum(prob)
         parent_comb = np.random.choice(a=np.arange(0,SAMPLE_SIZE), size=(POPULATION_SIZE,2), p=prob)
         children = [crossover(parents[parent_comb[i,0]].Genes, parents[parent_comb[i,1]].Genes) for i in range(POPULATION_SIZE)]
@@ -120,7 +123,7 @@ def genetic_algorithm(population, functions, constants):
         # print("mutations ",sum([1 if prev_children[i][j] == children[i][j] else 0 for i in range(len(children)) for j in range(len(children[0]))]))
 
         # list(Chromosomes)
-        fitness_vals = fitness(children)
+        fitness_vals = fitness(children, display=True)
         population = [Chromosome(children[i], fitness_vals[i]) for i in range(POPULATION_SIZE)]
 
     # plot statistics
@@ -129,17 +132,22 @@ def genetic_algorithm(population, functions, constants):
 
 if __name__ == "__main__":
     gene_range = [(10,100), (1,10), (1,10), (1,50), (1,50)]
-    POPULATION_SIZE = 20
+    POPULATION_SIZE = 15
     GENE_LENGTH = len(gene_range)
-    SAMPLE_SIZE = 15 # >= POPULATION_SIZE/2
-    MAX_ITER = 50
+    SAMPLE_SIZE = 10 # >= POPULATION_SIZE/2
+    MAX_ITER = 30
     fitness = Fitness().fitness
     select = SelectionMethod(SAMPLE_SIZE).truncationSelection
     crossover = CrossoverMethod(GENE_LENGTH).interpolation
+    # crossover = CrossoverMethod(GENE_LENGTH).twoPoint
     mutate =  MutationMethod(GENE_LENGTH).GaussianMutation
+    # mutate =  MutationMethod(GENE_LENGTH).BitwiseGaussian
     population, fitness_vals = starting_population(POPULATION_SIZE, fitness, gene_range, GENE_LENGTH)
-    best = genetic_algorithm((population,fitness_vals), (fitness, select, crossover, mutate), (MAX_ITER, POPULATION_SIZE, SAMPLE_SIZE))
+    heading = "Population=15, sample=10, \n Truncation selection, interpolation crossover, gaussian mutation"
+    name = "results/13.png"
+    best = genetic_algorithm((population,fitness_vals), (fitness, select, crossover, mutate), 
+        (MAX_ITER, POPULATION_SIZE, SAMPLE_SIZE), heading, name)
     print("best gene:",best.Genes)
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     fitness([best.Genes], display=True)
 
